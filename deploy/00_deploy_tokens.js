@@ -15,6 +15,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         log: true,
     });
 
+    await deploy("SilverToken", {
+        contract: "ERC20PresetMinterPauser",
+        from: deployer,
+        args: ["SilverToken", "SILV"],
+        log: true,
+    });
+
     await deploy("CryptoPunks", {
         contract: "ERC721PresetMinterPauserAutoId",
         from: deployer,
