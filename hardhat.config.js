@@ -1,6 +1,7 @@
 require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("hardhat-deploy");
+require("hardhat-gas-reporter");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -19,7 +20,24 @@ task("accounts", "Prints the list of accounts", async (taskArgs, hre) => {
  * @type import('hardhat/config').HardhatUserConfig
  */
 module.exports = {
-    solidity: { compilers: [{ version: "0.8.4" }, { version: "0.4.18" }] },
+    solidity: {
+        compilers: [
+            {
+                version: "0.8.4",
+                optimizer: {
+                    enabled: true,
+                    runs: 500,
+                },
+            },
+            {
+                version: "0.4.18",
+                optimizer: {
+                    enabled: true,
+                    runs: 500,
+                },
+            },
+        ],
+    },
     namedAccounts: {
         deployer: {
             default: 0,
@@ -27,6 +45,9 @@ module.exports = {
         secondary: {
             default: 1,
         },
+    },
+    gasReporter: {
+        enabled: true,
     },
     networks: {
         optimistic: {
