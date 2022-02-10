@@ -4,22 +4,22 @@ const { parseEther, arrayify } = require("ethers/lib/utils");
 const { deployments, ethers, network } = require("hardhat");
 const { signOrder } = require("./utils");
 
-describe("Backspread", function () {
+describe("Putty", function () {
     let Weth;
-    let Backspread;
+    let Putty;
     let GoldToken;
     let CryptoPunks;
     let option;
 
     beforeEach(async () => {
-        await deployments.fixture(["Tokens", "Backspread"]);
+        await deployments.fixture(["Tokens", "Putty", "Abis"]);
 
         const { deployer, secondary } = await ethers.getNamedSigners();
         Weth = await ethers.getContract("WETH9", deployer.address);
         GoldToken = await ethers.getContract("GoldToken", deployer.address);
         SilverToken = await ethers.getContract("SilverToken", deployer.address);
         CryptoPunks = await ethers.getContract("CryptoPunks", deployer.address);
-        Backspread = await ethers.getContract("Backspread", deployer.address);
+        Putty = await ethers.getContract("Putty", deployer.address);
 
         option = {
             strike: parseEther("1"),
@@ -52,7 +52,7 @@ describe("Backspread", function () {
         for (signer of [deployer, secondary]) {
             // mint weth
             await Weth.connect(signer).approve(
-                Backspread.address,
+                Putty.address,
                 constants.MaxUint256
             );
             await signer.sendTransaction({
@@ -62,36 +62,36 @@ describe("Backspread", function () {
 
             await GoldToken.mint(signer.address, parseEther("1000"));
             await GoldToken.connect(signer).approve(
-                Backspread.address,
+                Putty.address,
                 constants.MaxUint256
             );
 
             await SilverToken.mint(signer.address, parseEther("1000"));
             await SilverToken.connect(signer).approve(
-                Backspread.address,
+                Putty.address,
                 constants.MaxUint256
             );
 
             await CryptoPunks.mint(signer.address);
             await CryptoPunks.mint(signer.address);
             await CryptoPunks.connect(signer).setApprovalForAll(
-                Backspread.address,
+                Putty.address,
                 true
             );
         }
     });
 
     it("Should initialise", async function () {
-        expect(await Backspread.weth()).to.equal(Weth.address);
+        expect(await Putty.weth()).to.equal(Weth.address);
     });
 
     describe("fillBuyOrder", function () {
         it("Should fail on invalid signature", async function () {
             const { deployer } = await ethers.getNamedSigners();
-            const { signature } = await signOrder(option, deployer, Backspread);
+            const { signature } = await signOrder(option, deployer, Putty);
 
             await expect(
-                Backspread.fillBuyOrder(option, signature)
+                Putty.fillBuyOrder(option, signature, { value: option.strike })
             ).to.revertedWith("Invalid order signature");
         });
 
@@ -100,15 +100,17 @@ describe("Backspread", function () {
             const { signature, orderHash, shortOrderHash } = await signOrder(
                 option,
                 secondary,
-                Backspread
+                Putty
             );
 
-            await Backspread.fillBuyOrder(option, signature);
+            await Putty.fillBuyOrder(option, signature, {
+                value: option.strike,
+            });
 
             // TODO: Fix this (weird bug with waffle)
             // expect(tx).to.changeTokenBalances(
             //     Weth,
-            //     [deployer, secondary, Backspread],
+            //     [deployer, secondary, Putty],
             //     [
             //         option.premium.sub(option.strike),
             //         option.premium.mul(-1),
@@ -118,7 +120,7 @@ describe("Backspread", function () {
 
             // TODO: Fix this (waffle fails to do deep comparison)
             // expect(tx)
-            //     .to.emit(Backspread, "BuyFilled")
+            //     .to.emit(Putty, "BuyFilled")
             //     .withArgs(
             //         Object.values(option),
             //         deployer.address,
@@ -126,27 +128,25 @@ describe("Backspread", function () {
             //         shortOrderHash
             //     );
 
-            expect(await Backspread.balanceOf(secondary.address)).to.equal(1);
-            expect(await Backspread.ownerOf(arrayify(orderHash))).to.equal(
+            expect(await Putty.balanceOf(secondary.address)).to.equal(1);
+            expect(await Putty.ownerOf(arrayify(orderHash))).to.equal(
                 secondary.address
             );
-            expect(await Backspread.ownerOf(arrayify(shortOrderHash))).to.equal(
+            expect(await Putty.ownerOf(arrayify(shortOrderHash))).to.equal(
                 deployer.address
             );
         });
 
         it("Should not allow duplicate fills", async function () {
             const { secondary } = await ethers.getNamedSigners();
-            const { signature } = await signOrder(
-                option,
-                secondary,
-                Backspread
-            );
+            const { signature } = await signOrder(option, secondary, Putty);
 
-            await Backspread.fillBuyOrder(option, signature);
+            await Putty.fillBuyOrder(option, signature, {
+                value: option.strike,
+            });
             await expect(
-                Backspread.fillBuyOrder(option, signature)
-            ).to.be.revertedWith("ERC721: token already minted");
+                Putty.fillBuyOrder(option, signature, { value: option.strike })
+            ).to.be.revertedWith("Order has already been filled");
         });
     });
 
@@ -154,13 +154,11 @@ describe("Backspread", function () {
         beforeEach(async () => {
             const { secondary } = await ethers.getNamedSigners();
 
-            const { signature } = await signOrder(
-                option,
-                secondary,
-                Backspread
-            );
+            const { signature } = await signOrder(option, secondary, Putty);
 
-            await Backspread.fillBuyOrder(option, signature);
+            await Putty.fillBuyOrder(option, signature, {
+                value: option.strike,
+            });
         });
 
         it("Should transfer underlying to buyer and weth to seller", async () => {
@@ -174,10 +172,9 @@ describe("Backspread", function () {
             const cryptoPunkOwnerBefore = await CryptoPunks.ownerOf(2);
 
             await expect(() =>
-                Backspread.connect(secondary).exercise(option)
-            ).to.changeTokenBalances(
-                Weth,
-                [Backspread, secondary],
+                Putty.connect(secondary).exercise(option)
+            ).to.changeEtherBalances(
+                [Putty, secondary],
                 [option.strike.mul("-1"), option.strike]
             );
 
@@ -198,7 +195,7 @@ describe("Backspread", function () {
         });
 
         it("Should not exercise option if owner is different to msg.sender", async () => {
-            await expect(Backspread.exercise(option)).to.be.revertedWith(
+            await expect(Putty.exercise(option)).to.be.revertedWith(
                 "Cannot exercise option you dont own"
             );
         });
@@ -210,25 +207,25 @@ describe("Backspread", function () {
             await network.provider.send("evm_mine");
 
             await expect(
-                Backspread.connect(secondary).exercise(option)
+                Putty.connect(secondary).exercise(option)
             ).to.be.revertedWith("Expired option");
         });
 
         it("Should not exercise option twice", async () => {
             const { secondary } = await ethers.getNamedSigners();
 
-            await Backspread.connect(secondary).exercise(option);
+            await Putty.connect(secondary).exercise(option);
 
             await expect(
-                Backspread.connect(secondary).exercise(option)
-            ).to.be.revertedWith("Option has already been exercised");
+                Putty.connect(secondary).exercise(option)
+            ).to.be.revertedWith("ERC721: owner query for nonexistent token");
         });
 
         it("Should not exercise option that doesn't exist", async () => {
             const { secondary } = await ethers.getNamedSigners();
 
             await expect(
-                Backspread.connect(secondary).exercise({
+                Putty.connect(secondary).exercise({
                     ...option,
                     nonce: 2,
                 })
@@ -239,34 +236,30 @@ describe("Backspread", function () {
     describe("cancel", () => {
         it("Should update cancelled orders", async () => {
             const { secondary, deployer } = await ethers.getNamedSigners();
-            const { orderHash } = await signOrder(option, deployer, Backspread);
+            const { orderHash } = await signOrder(option, deployer, Putty);
 
-            await Backspread.connect(secondary).cancel(option);
+            await Putty.connect(secondary).cancel(option);
 
-            expect(
-                await Backspread.cancelledOrders(arrayify(orderHash))
-            ).to.equal(true);
+            expect(await Putty.cancelledOrders(arrayify(orderHash))).to.equal(
+                true
+            );
         });
 
         it("Should not fill a cancelled order", async () => {
             const { secondary } = await ethers.getNamedSigners();
-            const { signature } = await signOrder(
-                option,
-                secondary,
-                Backspread
-            );
+            const { signature } = await signOrder(option, secondary, Putty);
 
-            await Backspread.connect(secondary).cancel(option);
+            await Putty.connect(secondary).cancel(option);
 
             await expect(
-                Backspread.fillBuyOrder(option, signature)
+                Putty.fillBuyOrder(option, signature, { value: option.strike })
             ).to.revertedWith("Order has been cancelled");
         });
 
         it("Should only allow the owner of an option to cancel", async () => {
             const { deployer } = await ethers.getNamedSigners();
             await expect(
-                Backspread.connect(deployer).cancel(option)
+                Putty.connect(deployer).cancel(option)
             ).to.be.revertedWith("You are not the owner");
         });
     });
@@ -274,13 +267,29 @@ describe("Backspread", function () {
     describe("expire", () => {
         beforeEach(async () => {
             const { secondary } = await ethers.getNamedSigners();
-            const { signature } = await signOrder(
-                option,
-                secondary,
-                Backspread
+            const { signature } = await signOrder(option, secondary, Putty);
+
+            await Putty.fillBuyOrder(option, signature, {
+                value: option.strike,
+            });
+        });
+
+        it("Should not fill buy order after it has expired", async () => {
+            const { secondary, deployer } = await ethers.getNamedSigners();
+
+            await network.provider.send("evm_increaseTime", [option.duration]);
+            await network.provider.send("evm_mine");
+
+            await expect(() => Putty.expire(option)).to.changeEtherBalances(
+                [Putty, deployer],
+                [option.strike.mul("-1"), option.strike]
             );
 
-            await Backspread.fillBuyOrder(option, signature);
+            const { signature } = await signOrder(option, secondary, Putty);
+
+            await expect(
+                Putty.fillBuyOrder(option, signature, { value: option.strike })
+            ).to.be.revertedWith("Order has already been filled");
         });
 
         it("Should return weth to seller on expiration", async () => {
@@ -289,22 +298,18 @@ describe("Backspread", function () {
             await network.provider.send("evm_increaseTime", [option.duration]);
             await network.provider.send("evm_mine");
 
-            await expect(() =>
-                Backspread.expire(option)
-            ).to.changeTokenBalances(
-                Weth,
-                [Backspread, deployer],
+            await expect(() => Putty.expire(option)).to.changeEtherBalances(
+                [Putty, deployer],
                 [option.strike.mul("-1"), option.strike]
             );
         });
 
         it("Should not expire an option that has not been filled", async () => {
-            await expect(Backspread.expire({ ...option, nonce: 2 })).to.be
-                .reverted;
+            await expect(Putty.expire({ ...option, nonce: 2 })).to.be.reverted;
         });
 
         it("Should only expire option if sufficient time has passed", async () => {
-            await expect(Backspread.expire(option)).to.be.revertedWith(
+            await expect(Putty.expire(option)).to.be.revertedWith(
                 "Option has not expired"
             );
         });
@@ -313,21 +318,21 @@ describe("Backspread", function () {
             await network.provider.send("evm_increaseTime", [option.duration]);
             await network.provider.send("evm_mine");
 
-            await Backspread.expire(option);
+            await Putty.expire(option);
 
-            await expect(Backspread.expire(option)).to.be.revertedWith(
-                "Option has been exercised or already cleared"
+            await expect(Putty.expire(option)).to.be.revertedWith(
+                "ERC721: owner query for nonexistent token"
             );
         });
 
         it("Should not expire an option that has already been filled", async () => {
             const { secondary, deployer } = await ethers.getNamedSigners();
-            await Backspread.connect(secondary).exercise(option);
+            await Putty.connect(secondary).exercise(option);
             await network.provider.send("evm_increaseTime", [option.duration]);
             await network.provider.send("evm_mine");
 
-            await expect(Backspread.expire(option)).to.be.revertedWith(
-                "Option has been exercised or already cleared"
+            await expect(Putty.expire(option)).to.be.revertedWith(
+                "ERC721: owner query for nonexistent token"
             );
         });
     });

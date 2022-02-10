@@ -1,7 +1,7 @@
 const { keccak256, defaultAbiCoder, arrayify } = require("ethers/lib/utils");
 
-const signOrder = async (option, signer, Backspread, isShort = false) => {
-    const domainSeparatorV4 = await Backspread.domainSeparatorV4();
+const signOrder = async (option, signer, Putty, isShort = false) => {
+    const domainSeparatorV4 = await Putty.domainSeparatorV4();
 
     const optionTypes = [
         "bytes32",
@@ -42,20 +42,7 @@ const signOrder = async (option, signer, Backspread, isShort = false) => {
     );
 
     const shortOrderHash = keccak256(
-        defaultAbiCoder.encode(
-            [...optionTypes, "bool"],
-            [
-                domainSeparatorV4,
-                option.strike,
-                option.duration,
-                option.premium,
-                option.owner,
-                option.nonce,
-                hashedErc20Underlying,
-                hashedErc721Underlying,
-                true,
-            ]
-        )
+        defaultAbiCoder.encode(["bytes32"], [orderHash])
     );
 
     const signature = await signer.signMessage(arrayify(orderHash));

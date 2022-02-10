@@ -2,24 +2,17 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    await deploy("GoldToken", {
+    await deploy("ERC20", {
         contract: "ERC20PresetMinterPauser",
         from: deployer,
-        args: ["GoldToken", "GOLD"],
+        args: ["erc20", "token"],
         log: true,
     });
 
-    await deploy("SilverToken", {
-        contract: "ERC20PresetMinterPauser",
-        from: deployer,
-        args: ["SilverToken", "SILV"],
-        log: true,
-    });
-
-    await deploy("CryptoPunks", {
+    await deploy("ERC721", {
         contract: "ERC721PresetMinterPauserAutoId",
         from: deployer,
-        args: ["CryptoPunks", "PUNK", "http://testing.com/"],
+        args: ["erc721", "token", "http://testing/"],
         log: true,
     });
 
@@ -30,4 +23,4 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
     });
 };
 
-module.exports.tags = ["Tokens"];
+module.exports.tags = ["Abis"];

@@ -6,27 +6,27 @@
 const hre = require("hardhat");
 
 async function main() {
-  // Hardhat always runs the compile task when running scripts with its command
-  // line interface.
-  //
-  // If this script is run directly using `node` you may want to call compile
-  // manually to make sure everything is compiled
-  // await hre.run('compile');
+    // Hardhat always runs the compile task when running scripts with its command
+    // line interface.
+    //
+    // If this script is run directly using `node` you may want to call compile
+    // manually to make sure everything is compiled
+    // await hre.run('compile');
 
-  // We get the contract to deploy
-  const Backspread = await hre.ethers.getContractFactory("Backspread");
-  const backspread = await Backspread.deploy();
+    // We get the contract to deploy
+    const Putty = await hre.ethers.getContractFactory("Putty");
+    const putty = await Putty.deploy();
 
-  await backspread.deployed();
+    await putty.deployed();
 
-  console.log("backspread deployed to:", backspread.address);
+    console.log("putty deployed to:", putty.address);
 }
 
 // We recommend this pattern to be able to use async/await everywhere
 // and properly handle errors.
 main()
-  .then(() => process.exit(0))
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  });
+    .then(() => process.exit(0))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });

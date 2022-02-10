@@ -1,10 +1,12 @@
 {
-  "name": "backspread",
+  "name": "puttyfi",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy-opkovan": "hardhat deploy --network optimisticKovan --export optimistic-kovan-contracts.json --tags Abis,Putty",
+    "deploy-kovan": "hardhat deploy --network kovan --export kovan-contracts.json --tags Abis,Putty"
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +23,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",
+    "dotenv": "^16.0.0",
     "hardhat-gas-reporter": "^1.0.7"
   }
 }

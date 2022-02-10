@@ -2,6 +2,7 @@ require("@nomiclabs/hardhat-waffle");
 require("@nomiclabs/hardhat-ethers");
 require("hardhat-deploy");
 require("hardhat-gas-reporter");
+require("dotenv").config();
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -57,8 +58,23 @@ module.exports = {
                     "test test test test test test test test test test test junk",
             },
         },
+        kovan: {
+            wethAddress: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
+            url: "https://eth-kovan.alchemyapi.io/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
+            accounts: [process.env.ROPSTEN_KEY],
+            tags: ["Abis", "Putty"],
+        },
+        optimisticKovan: {
+            wethAddress: "0xbc6f6b680bc61e30db47721c6d1c5cde19c1300d",
+            url: "https://opt-kovan.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
+            accounts: [process.env.ROPSTEN_KEY],
+            tags: ["Abis", "Putty"],
+        },
+        hardhat: {
+            // mining: {
+            //     auto: false,
+            //     interval: 10_000,
+            // },
+        },
     },
 };
-
-// 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
-// 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
