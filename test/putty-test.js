@@ -148,6 +148,23 @@ describe("Putty", function () {
                 Putty.fillBuyOrder(option, signature, { value: option.strike })
             ).to.be.revertedWith("Order has already been filled");
         });
+
+        it("Should mark order as filled", async function () {
+            const { secondary } = await ethers.getNamedSigners();
+            const { signature, orderHash } = await signOrder(
+                option,
+                secondary,
+                Putty
+            );
+
+            expect(await Putty.filledOrders(orderHash)).to.eq(false);
+
+            await Putty.fillBuyOrder(option, signature, {
+                value: option.strike,
+            });
+
+            expect(await Putty.filledOrders(orderHash)).to.eq(true);
+        });
     });
 
     describe("exercise", () => {
@@ -159,6 +176,15 @@ describe("Putty", function () {
             await Putty.fillBuyOrder(option, signature, {
                 value: option.strike,
             });
+        });
+
+        it("Should mark order as filled", async function () {
+            const { secondary } = await ethers.getNamedSigners();
+            const { orderHash } = await signOrder(option, secondary, Putty);
+
+            expect(await Putty.filledOrders(orderHash)).to.eq(true);
+            await Putty.connect(secondary).exercise(option);
+            expect(await Putty.filledOrders(orderHash)).to.eq(true);
         });
 
         it("Should transfer underlying to buyer and weth to seller", async () => {
@@ -272,6 +298,17 @@ describe("Putty", function () {
             await Putty.fillBuyOrder(option, signature, {
                 value: option.strike,
             });
+        });
+
+        it("Should mark order as filled", async () => {
+            const { secondary, deployer } = await ethers.getNamedSigners();
+            await network.provider.send("evm_increaseTime", [option.duration]);
+            await network.provider.send("evm_mine");
+
+            await Putty.expire(option);
+
+            const { orderHash } = await signOrder(option, secondary, Putty);
+            expect(await Putty.filledOrders(orderHash)).to.eq(true);
         });
 
         it("Should not fill buy order after it has expired", async () => {

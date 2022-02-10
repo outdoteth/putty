@@ -1414,7 +1414,7 @@
       ]
     },
     "Putty": {
-      "address": "0x588D2bCF752CAB75F9148cf76b641eEae4E28DE9",
+      "address": "0xF46Ce5795aE1Ae802127A8eb6E95095Ce515fc0c",
       "abi": [
         {
           "inputs": [
@@ -1986,7 +1986,7 @@
           "inputs": [
             {
               "internalType": "uint256",
-              "name": "",
+              "name": "tokenId",
               "type": "uint256"
             }
           ],

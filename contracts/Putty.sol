@@ -12,7 +12,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 contract Putty is
     EIP712("Putty", "v0.9"),
     ERC721("Putty Options", "OPUT"),
-    // ERC721Enumerable,
+    ERC721Enumerable,
     ReentrancyGuard
 {
     using SafeERC20 for ERC20;
@@ -24,8 +24,6 @@ contract Putty is
 
     mapping(uint256 => uint256) public tokenIdToCreationTimestamp;
     mapping(uint256 => bool) public cancelledOrders;
-    mapping(uint256 => bool) public filledOrders;
-    mapping(uint256 => address) internal _owners;
 
     struct ERC20Info {
         ERC20 token;
@@ -52,22 +50,22 @@ contract Putty is
         baseURI = baseURI_;
     }
 
-    // function _beforeTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) internal override(ERC721, ERC721Enumerable) {
-    //     super._beforeTokenTransfer(from, to, tokenId);
-    // }
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
 
-    // function supportsInterface(bytes4 interfaceId)
-    //     public
-    //     view
-    //     override(ERC721, ERC721Enumerable)
-    //     returns (bool)
-    // {
-    //     return super.supportsInterface(interfaceId);
-    // }
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
@@ -96,6 +94,10 @@ contract Putty is
         );
 
         shortOrderHash = keccak256(abi.encode(orderHash));
+    }
+
+    function filledOrders(uint256 tokenId) public view returns (bool) {
+        return tokenIdToCreationTimestamp[tokenId] > 0;
     }
 
     function fillBuyOrder(Option memory option, bytes memory signature)
