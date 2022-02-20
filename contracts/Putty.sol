@@ -1,19 +1,21 @@
 //SPDX-License-Identifier: Unlicense
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract Putty is
     EIP712("Putty", "v0.9"),
     ERC721("Putty Options", "OPUT"),
     ERC721Enumerable,
-    ReentrancyGuard
+    ReentrancyGuard,
+    Ownable
 {
     using SafeERC20 for ERC20;
 
@@ -21,6 +23,9 @@ contract Putty is
 
     ERC20 public weth;
     string public baseURI;
+
+    uint256 public uncollectedFees;
+    uint256 public feeRate;
 
     mapping(uint256 => uint256) public tokenIdToCreationTimestamp;
     mapping(uint256 => bool) public cancelledOrders;
@@ -45,59 +50,35 @@ contract Putty is
         ERC721Info[] erc721Underlying;
     }
 
-    constructor(ERC20 weth_, string memory baseURI_) {
+    constructor(
+        ERC20 weth_,
+        string memory baseURI_,
+        uint256 feeRate_
+    ) {
         weth = weth_;
+        baseURI = baseURI_;
+        feeRate = feeRate_;
+    }
+
+    /** External functions */
+
+    function setBaseURI(string calldata baseURI_) external onlyOwner {
         baseURI = baseURI_;
     }
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override(ERC721, ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId);
+    /** Public functions */
+
+    function setFeeRate(uint256 feeRate_) public onlyOwner {
+        require(feeRate_ <= 1000, "Cannot charge greater than 100% fees");
+        feeRate = feeRate_;
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
-    }
+    function withdrawFees(address recipient) public onlyOwner {
+        uint256 amount = uncollectedFees;
+        uncollectedFees = 0;
 
-    function _baseURI() internal view override returns (string memory) {
-        return baseURI;
-    }
-
-    function domainSeparatorV4() public view returns (bytes32) {
-        return _domainSeparatorV4();
-    }
-
-    function _hashOption(Option memory option)
-        internal
-        view
-        returns (bytes32 orderHash, bytes32 shortOrderHash)
-    {
-        orderHash = keccak256(
-            abi.encode(
-                _domainSeparatorV4(),
-                option.strike,
-                option.duration,
-                option.premium,
-                option.owner,
-                option.nonce,
-                keccak256(abi.encode(option.erc20Underlying)),
-                keccak256(abi.encode(option.erc721Underlying))
-            )
-        );
-
-        shortOrderHash = keccak256(abi.encode(orderHash));
-    }
-
-    function filledOrders(uint256 tokenId) public view returns (bool) {
-        return tokenIdToCreationTimestamp[tokenId] > 0;
+        (bool success, ) = recipient.call{ value: amount }("");
+        require(success, "ETH transfer to seller failed");
     }
 
     function fillBuyOrder(Option memory option, bytes memory signature)
@@ -135,7 +116,8 @@ contract Putty is
         // *** Interactions *** //
 
         // transfer the premium (WETH) from the buyer -> seller
-        weth.transferFrom(option.owner, msg.sender, option.premium);
+        // (protocol collects 2% as a fee)
+        weth.transferFrom(option.owner, msg.sender, (option.premium * 980) / 1000);
 
         emit BuyFilled(option, msg.sender, tokenId, shortTokenId);
     }
@@ -176,7 +158,9 @@ contract Putty is
         }
 
         // transfer strike (ETH) to buyer
-        (bool success, ) = buyer.call{ value: option.strike }("");
+        uint256 fee = (option.strike * feeRate) / 1000;
+        uncollectedFees += fee;
+        (bool success, ) = buyer.call{ value: option.strike - fee }("");
         require(success, "ETH transfer to buyer failed");
     }
 
@@ -213,5 +197,57 @@ contract Putty is
         // transfer strike (ETH) to buyer
         (bool success, ) = seller.call{ value: option.strike }("");
         require(success, "ETH transfer to seller failed");
+    }
+
+    function domainSeparatorV4() public view returns (bytes32) {
+        return _domainSeparatorV4();
+    }
+
+    function filledOrders(uint256 tokenId) public view returns (bool) {
+        return tokenIdToCreationTimestamp[tokenId] > 0;
+    }
+
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
+
+    /** Internal functions */
+
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
+    function _hashOption(Option memory option)
+        internal
+        view
+        returns (bytes32 orderHash, bytes32 shortOrderHash)
+    {
+        orderHash = keccak256(
+            abi.encode(
+                _domainSeparatorV4(),
+                option.strike,
+                option.duration,
+                option.premium,
+                option.owner,
+                option.nonce,
+                keccak256(abi.encode(option.erc20Underlying)),
+                keccak256(abi.encode(option.erc721Underlying))
+            )
+        );
+
+        shortOrderHash = keccak256(abi.encode(orderHash));
     }
 }

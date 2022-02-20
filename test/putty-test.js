@@ -81,8 +81,22 @@ describe("Putty", function () {
         }
     });
 
-    it("Should initialise", async function () {
-        expect(await Putty.weth()).to.equal(Weth.address);
+    describe("meta (miscellaneous logic)", async function () {
+        it("Should initialise", async function () {
+            expect(await Putty.weth()).to.equal(Weth.address);
+        });
+
+        it("Should set baseURI", async function () {
+            await Putty.setBaseURI("http://a.random.url");
+            expect(await Putty.baseURI()).to.eq("http://a.random.url");
+        });
+
+        it("Should only allow admin to set baseURI", async function () {
+            const { secondary } = await ethers.getNamedSigners();
+            await expect(
+                Putty.connect(secondary).setBaseURI("http://a.random.url")
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+        });
     });
 
     describe("fillBuyOrder", function () {
@@ -167,7 +181,95 @@ describe("Putty", function () {
         });
     });
 
+    describe("fees", async function () {
+        it("Should set feeRate", async function () {
+            await Putty.setFeeRate(100);
+            expect(await Putty.feeRate()).to.eq(100);
+        });
+
+        it("Should only allow admin to set feeRate", async function () {
+            const { secondary } = await ethers.getNamedSigners();
+            await expect(
+                Putty.connect(secondary).setFeeRate(10)
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+
+        it("Should not set feeRate greater than 1000", async function () {
+            await expect(Putty.setFeeRate(1001)).to.be.revertedWith(
+                "Cannot charge greater than 100% fees"
+            );
+        });
+
+        it("Should withdraw uncollected fees and reset uncollectedFees", async function () {
+            const { deployer, secondary } = await ethers.getNamedSigners();
+            const feeRate = await Putty.feeRate();
+
+            const fillBuyOrderAndExercise = async (option) => {
+                const { signature } = await signOrder(option, secondary, Putty);
+                await Putty.fillBuyOrder(option, signature, {
+                    value: option.strike,
+                });
+
+                await Putty.connect(secondary).exercise(option);
+            };
+
+            const option1 = { ...option, strike: parseEther("15") };
+            const option2 = {
+                ...option,
+                strike: parseEther("8"),
+                erc721Underlying: [],
+            };
+
+            await fillBuyOrderAndExercise(option1);
+            const option1Fee = option1.strike.mul(feeRate).div("1000");
+            expect(await Putty.uncollectedFees()).to.eq(option1Fee);
+
+            await fillBuyOrderAndExercise(option2);
+            const option2Fee = option2.strike.mul(feeRate).div("1000");
+            expect(await Putty.uncollectedFees()).to.eq(
+                option2Fee.add(option1Fee)
+            );
+
+            await expect(() =>
+                Putty.withdrawFees(deployer.address)
+            ).to.changeEtherBalances(
+                [Putty, deployer],
+                [
+                    option1Fee.add(option2Fee).mul("-1"),
+                    option1Fee.add(option2Fee),
+                ]
+            );
+            expect(await Putty.uncollectedFees()).to.eq(0);
+
+            const option3 = {
+                ...option,
+                strike: parseEther("2"),
+                erc721Underlying: [],
+            };
+            await fillBuyOrderAndExercise(option3);
+            const option3Fee = option3.strike.mul(feeRate).div("1000");
+            expect(await Putty.uncollectedFees()).to.eq(option3Fee);
+            await expect(() =>
+                Putty.withdrawFees(secondary.address)
+            ).to.changeEtherBalances(
+                [Putty, secondary],
+                [option3Fee.mul("-1"), option3Fee]
+            );
+            expect(await Putty.uncollectedFees()).to.eq(0);
+        });
+
+        it("Should only allow admin to withdraw fees", async function () {
+            const { secondary } = await ethers.getNamedSigners();
+
+            await expect(
+                Putty.connect(secondary).withdrawFees(secondary.address)
+            ).to.be.revertedWith("Ownable: caller is not the owner");
+        });
+    });
+
     describe("exercise", () => {
+        let feeRate;
+
         beforeEach(async () => {
             const { secondary } = await ethers.getNamedSigners();
 
@@ -176,6 +278,8 @@ describe("Putty", function () {
             await Putty.fillBuyOrder(option, signature, {
                 value: option.strike,
             });
+
+            feeRate = await Putty.feeRate();
         });
 
         it("Should mark order as filled", async function () {
@@ -197,11 +301,12 @@ describe("Putty", function () {
 
             const cryptoPunkOwnerBefore = await CryptoPunks.ownerOf(2);
 
+            const fee = option.strike.mul(feeRate).div("1000");
             await expect(() =>
                 Putty.connect(secondary).exercise(option)
             ).to.changeEtherBalances(
                 [Putty, secondary],
-                [option.strike.mul("-1"), option.strike]
+                [option.strike.mul("-1").add(fee), option.strike.sub(fee)]
             );
 
             const [deployerBalanceAfter, secondaryBalanceAfter] = [

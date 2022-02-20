@@ -12,10 +12,11 @@ module.exports = async ({
     const wethAddress =
         network.config.wethAddress || (await deployments.get("WETH9")).address;
     const baseURI = `https://${network.name}.putty.finance/api/token/`;
+    const feeRate = 20; // 2%
 
     await deploy("Putty", {
         from: deployer,
-        args: [wethAddress, baseURI],
+        args: [wethAddress, baseURI, feeRate],
         log: true,
     });
 };

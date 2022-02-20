@@ -3,6 +3,7 @@ require("@nomiclabs/hardhat-ethers");
 require("hardhat-deploy");
 require("hardhat-gas-reporter");
 require("dotenv").config();
+require("hardhat-contract-sizer");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -25,16 +26,20 @@ module.exports = {
         compilers: [
             {
                 version: "0.8.4",
-                optimizer: {
-                    enabled: true,
-                    runs: 500,
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 500,
+                    },
                 },
             },
             {
                 version: "0.4.18",
-                optimizer: {
-                    enabled: true,
-                    runs: 500,
+                settings: {
+                    optimizer: {
+                        enabled: true,
+                        runs: 500,
+                    },
                 },
             },
         ],
@@ -49,6 +54,9 @@ module.exports = {
     },
     gasReporter: {
         enabled: true,
+    },
+    contractSizer: {
+        runOnCompile: true,
     },
     networks: {
         optimistic: {
