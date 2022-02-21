@@ -14,7 +14,9 @@ describe("Putty", function () {
     beforeEach(async () => {
         await deployments.fixture(["Tokens", "Putty", "Abis"]);
 
-        const { deployer, secondary } = await ethers.getNamedSigners();
+        const [deployer, secondary, tertiary, quaternary] =
+            await ethers.getSigners();
+
         Weth = await ethers.getContract("WETH9", deployer.address);
         GoldToken = await ethers.getContract("GoldToken", deployer.address);
         SilverToken = await ethers.getContract("SilverToken", deployer.address);
@@ -49,7 +51,7 @@ describe("Putty", function () {
             ],
         };
 
-        for (signer of [deployer, secondary]) {
+        for (signer of [deployer, secondary, tertiary, quaternary]) {
             // mint weth
             await Weth.connect(signer).approve(
                 Putty.address,
@@ -117,30 +119,17 @@ describe("Putty", function () {
                 Putty
             );
 
-            await Putty.fillBuyOrder(option, signature, {
-                value: option.strike,
-            });
-
-            // TODO: Fix this (weird bug with waffle)
-            // expect(tx).to.changeTokenBalances(
-            //     Weth,
-            //     [deployer, secondary, Putty],
-            //     [
-            //         option.premium.sub(option.strike),
-            //         option.premium.mul(-1),
-            //         option.strike,
-            //     ]
-            // );
-
-            // TODO: Fix this (waffle fails to do deep comparison)
-            // expect(tx)
-            //     .to.emit(Putty, "BuyFilled")
-            //     .withArgs(
-            //         Object.values(option),
-            //         deployer.address,
-            //         orderHash,
-            //         shortOrderHash
-            //     );
+            await expect(() =>
+                expect(
+                    Putty.fillBuyOrder(option, signature, {
+                        value: option.strike,
+                    })
+                ).to.emit(Putty, "BuyFilled")
+            ).to.changeTokenBalances(
+                Weth,
+                [deployer, secondary],
+                [option.premium, option.premium.mul(-1)]
+            );
 
             expect(await Putty.balanceOf(secondary.address)).to.equal(1);
             expect(await Putty.ownerOf(arrayify(orderHash))).to.equal(
@@ -272,7 +261,6 @@ describe("Putty", function () {
 
         beforeEach(async () => {
             const { secondary } = await ethers.getNamedSigners();
-
             const { signature } = await signOrder(option, secondary, Putty);
 
             await Putty.fillBuyOrder(option, signature, {
@@ -282,12 +270,15 @@ describe("Putty", function () {
             feeRate = await Putty.feeRate();
         });
 
-        it("Should mark order as filled", async function () {
+        it("Should mark order as filled and emit event", async function () {
             const { secondary } = await ethers.getNamedSigners();
             const { orderHash } = await signOrder(option, secondary, Putty);
 
             expect(await Putty.filledOrders(orderHash)).to.eq(true);
-            await Putty.connect(secondary).exercise(option);
+            await expect(Putty.connect(secondary).exercise(option)).to.emit(
+                Putty,
+                "Exercised"
+            );
             expect(await Putty.filledOrders(orderHash)).to.eq(true);
         });
 
@@ -362,14 +353,71 @@ describe("Putty", function () {
                 })
             ).to.reverted;
         });
+
+        it("Should send underlying to short put owner and strike to long put owner", async function () {
+            const [deployer, secondary, tertiary, quaternary] =
+                await ethers.getSigners();
+
+            const { orderHash, shortOrderHash } = await signOrder(
+                option,
+                secondary,
+                Putty
+            );
+
+            await Putty.connect(secondary).transferFrom(
+                secondary.address,
+                tertiary.address,
+                orderHash
+            );
+
+            await Putty.transferFrom(
+                deployer.address,
+                quaternary.address,
+                shortOrderHash
+            );
+
+            expect(await Putty.ownerOf(orderHash)).to.eql(tertiary.address);
+            expect(await Putty.ownerOf(shortOrderHash)).to.eql(
+                quaternary.address
+            );
+
+            await CryptoPunks.connect(secondary).transferFrom(
+                secondary.address,
+                tertiary.address,
+                2
+            );
+
+            await CryptoPunks.connect(secondary).transferFrom(
+                secondary.address,
+                tertiary.address,
+                3
+            );
+
+            const fee = option.strike.mul(await Putty.feeRate()).div("1000");
+            await expect(
+                await Putty.connect(tertiary).exercise(option)
+            ).to.changeEtherBalances(
+                [tertiary, Putty],
+                [option.strike.sub(fee), option.strike.mul("-1").add(fee)]
+            );
+
+            expect(await CryptoPunks.ownerOf(3)).to.eq(quaternary.address);
+            expect(await CryptoPunks.ownerOf(2)).to.eq(quaternary.address);
+
+            expect(await Putty.uncollectedFees()).to.eq(fee);
+            expect(await ethers.provider.getBalance(Putty.address)).to.eq(fee);
+        });
     });
 
     describe("cancel", () => {
-        it("Should update cancelled orders", async () => {
+        it("Should update cancelled orders and emit event", async () => {
             const { secondary, deployer } = await ethers.getNamedSigners();
             const { orderHash } = await signOrder(option, deployer, Putty);
 
-            await Putty.connect(secondary).cancel(option);
+            await expect(Putty.connect(secondary).cancel(option)).to.emit(
+                Putty,
+                "Cancelled"
+            );
 
             expect(await Putty.cancelledOrders(arrayify(orderHash))).to.equal(
                 true
@@ -405,12 +453,12 @@ describe("Putty", function () {
             });
         });
 
-        it("Should mark order as filled", async () => {
+        it("Should mark order as filled and emit event", async () => {
             const { secondary, deployer } = await ethers.getNamedSigners();
             await network.provider.send("evm_increaseTime", [option.duration]);
             await network.provider.send("evm_mine");
 
-            await Putty.expire(option);
+            await expect(Putty.expire(option)).to.emit(Putty, "Expired");
 
             const { orderHash } = await signOrder(option, secondary, Putty);
             expect(await Putty.filledOrders(orderHash)).to.eq(true);

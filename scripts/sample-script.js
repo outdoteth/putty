@@ -14,12 +14,13 @@ async function main() {
     // await hre.run('compile');
 
     // We get the contract to deploy
-    const Putty = await hre.ethers.getContractFactory("Putty");
-    const putty = await Putty.deploy();
-
-    await putty.deployed();
-
-    console.log("putty deployed to:", putty.address);
+    const Putty = await hre.ethers.getContract("Putty");
+    const chainId = await hre.getChainId();
+    const tx = await Putty.setBaseURI(
+        `https://dev.putty.finance/api/tokenMetadata/${chainId}/`
+    );
+    await tx.wait();
+    console.log(await Putty.baseURI(), hre.getChainId());
 }
 
 // We recommend this pattern to be able to use async/await everywhere

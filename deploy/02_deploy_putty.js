@@ -11,7 +11,8 @@ module.exports = async ({
 
     const wethAddress =
         network.config.wethAddress || (await deployments.get("WETH9")).address;
-    const baseURI = `https://${network.name}.putty.finance/api/token/`;
+    const chainId = await getChainId();
+    const baseURI = `https://dev.putty.finance/api/${chainId}/`;
     const feeRate = 20; // 2%
 
     await deploy("Putty", {

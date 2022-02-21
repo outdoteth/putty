@@ -13,13 +13,16 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Putty is
     EIP712("Putty", "v0.9"),
     ERC721("Putty Options", "OPUT"),
-    ERC721Enumerable,
+    // ERC721Enumerable,
     ReentrancyGuard,
     Ownable
 {
     using SafeERC20 for ERC20;
 
-    event BuyFilled(Option _option, address indexed buyer, uint256 tokenId, uint256 shortTokenId);
+    event BuyFilled(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
+    event Exercised(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
+    event Cancelled(Option option);
+    event Expired(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
 
     ERC20 public weth;
     string public baseURI;
@@ -81,7 +84,7 @@ contract Putty is
         require(success, "ETH transfer to seller failed");
     }
 
-    function fillBuyOrder(Option memory option, bytes memory signature)
+    function fillBuyOrder(Option calldata option, bytes calldata signature)
         public
         payable
         nonReentrant
@@ -95,18 +98,18 @@ contract Putty is
         (bytes32 orderHash, bytes32 shortOrderHash) = _hashOption(option);
         (uint256 tokenId, uint256 shortTokenId) = (uint256(orderHash), uint256(shortOrderHash));
 
-        // check the signature
+        // check the signature for the buy order
         bytes32 digest = ECDSA.toEthSignedMessageHash(orderHash);
         address signer = ECDSA.recover(digest, signature);
         require(signer == option.owner, "Invalid order signature");
 
-        // Check that the order has not been cancelled or filled already
+        // check that the order has not been cancelled or filled already
         require(!cancelledOrders[tokenId], "Order has been cancelled");
         require(tokenIdToCreationTimestamp[tokenId] == 0, "Order has already been filled");
 
         // *** Effects *** //
 
-        // mark the creation of the contract for calculating the expiry date
+        // save the creation timestamp for calculating the expiry date later
         tokenIdToCreationTimestamp[tokenId] = block.timestamp;
 
         // mint the option NFT contracts to the buyer and seller
@@ -116,13 +119,12 @@ contract Putty is
         // *** Interactions *** //
 
         // transfer the premium (WETH) from the buyer -> seller
-        // (protocol collects 2% as a fee)
-        weth.transferFrom(option.owner, msg.sender, (option.premium * 980) / 1000);
+        weth.transferFrom(option.owner, msg.sender, option.premium);
 
         emit BuyFilled(option, msg.sender, tokenId, shortTokenId);
     }
 
-    function exercise(Option memory option) public nonReentrant {
+    function exercise(Option calldata option) public nonReentrant {
         // *** Checks *** //
 
         // hash the fields and get buyer/seller
@@ -157,23 +159,27 @@ contract Putty is
             info.token.transferFrom(buyer, seller, info.tokenId);
         }
 
-        // transfer strike (ETH) to buyer
+        // transfer strike (ETH) to buyer and collect our fee
         uint256 fee = (option.strike * feeRate) / 1000;
         uncollectedFees += fee;
         (bool success, ) = buyer.call{ value: option.strike - fee }("");
         require(success, "ETH transfer to buyer failed");
+
+        emit Exercised(option, seller, tokenId, shortTokenId);
     }
 
-    function cancel(Option memory option) public {
+    function cancel(Option calldata option) public {
         require(msg.sender == option.owner, "You are not the owner");
 
         (bytes32 orderHash, ) = _hashOption(option);
         uint256 tokenId = uint256(orderHash);
 
         cancelledOrders[tokenId] = true;
+
+        emit Cancelled(option);
     }
 
-    function expire(Option memory option) public {
+    function expire(Option calldata option) public {
         // *** Checks *** //
 
         // hash the fields and get the seller
@@ -197,6 +203,8 @@ contract Putty is
         // transfer strike (ETH) to buyer
         (bool success, ) = seller.call{ value: option.strike }("");
         require(success, "ETH transfer to seller failed");
+
+        emit Expired(option, seller, tokenId, shortTokenId);
     }
 
     function domainSeparatorV4() public view returns (bytes32) {
@@ -207,30 +215,30 @@ contract Putty is
         return tokenIdToCreationTimestamp[tokenId] > 0;
     }
 
-    function supportsInterface(bytes4 interfaceId)
-        public
-        view
-        override(ERC721, ERC721Enumerable)
-        returns (bool)
-    {
-        return super.supportsInterface(interfaceId);
-    }
+    // function supportsInterface(bytes4 interfaceId)
+    //     public
+    //     view
+    //     override(ERC721, ERC721Enumerable)
+    //     returns (bool)
+    // {
+    //     return super.supportsInterface(interfaceId);
+    // }
 
     /** Internal functions */
 
-    function _beforeTokenTransfer(
-        address from,
-        address to,
-        uint256 tokenId
-    ) internal override(ERC721, ERC721Enumerable) {
-        super._beforeTokenTransfer(from, to, tokenId);
-    }
+    // function _beforeTokenTransfer(
+    //     address from,
+    //     address to,
+    //     uint256 tokenId
+    // ) internal override(ERC721, ERC721Enumerable) {
+    //     super._beforeTokenTransfer(from, to, tokenId);
+    // }
 
     function _baseURI() internal view override returns (string memory) {
         return baseURI;
     }
 
-    function _hashOption(Option memory option)
+    function _hashOption(Option calldata option)
         internal
         view
         returns (bytes32 orderHash, bytes32 shortOrderHash)
