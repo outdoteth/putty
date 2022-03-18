@@ -1,5 +1,19 @@
-//SPDX-License-Identifier: Unlicense
+//SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
+
+/*
+
+        ██████╗ ██╗   ██╗████████╗████████╗██╗   ██╗
+        ██╔══██╗██║   ██║╚══██╔══╝╚══██╔══╝╚██╗ ██╔╝
+        ██████╔╝██║   ██║   ██║      ██║    ╚████╔╝ 
+        ██╔═══╝ ██║   ██║   ██║      ██║     ╚██╔╝  
+        ██║     ╚██████╔╝   ██║      ██║      ██║   
+        ╚═╝      ╚═════╝    ╚═╝      ╚═╝      ╚═╝   
+
+
+       by out.eth and 0xtamogoyaki
+
+*/
 
 import "hardhat/console.sol";
 import "@openzeppelin/contracts/utils/cryptography/draft-EIP712.sol";
@@ -13,7 +27,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Putty is
     EIP712("Putty", "v0.9"),
     ERC721("Putty Options", "OPUT"),
-    // ERC721Enumerable,
+    // ERC721Enumerable, // Only for L2s
     ReentrancyGuard,
     Ownable
 {
@@ -24,7 +38,7 @@ contract Putty is
     event Cancelled(Option option);
     event Expired(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
 
-    ERC20 public weth;
+    ERC20 public immutable weth;
     string public baseURI;
 
     uint256 public uncollectedFees;
@@ -63,13 +77,13 @@ contract Putty is
         feeRate = feeRate_;
     }
 
-    /** External functions */
+    /*********************
+        ADMIN FUNCTIONS
+    **********************/
 
-    function setBaseURI(string calldata baseURI_) external onlyOwner {
+    function setBaseURI(string calldata baseURI_) public onlyOwner {
         baseURI = baseURI_;
     }
-
-    /** Public functions */
 
     function setFeeRate(uint256 feeRate_) public onlyOwner {
         require(feeRate_ <= 1000, "Cannot charge greater than 100% fees");
@@ -83,6 +97,10 @@ contract Putty is
         (bool success, ) = recipient.call{ value: amount }("");
         require(success, "ETH transfer to seller failed");
     }
+
+    /*********************
+        LOGIC FUNCTIONS
+    **********************/
 
     function fillBuyOrder(Option calldata option, bytes calldata signature)
         public
@@ -200,43 +218,16 @@ contract Putty is
 
         // *** Interactions *** //
 
-        // transfer strike (ETH) to buyer
+        // transfer strike (ETH) to seller
         (bool success, ) = seller.call{ value: option.strike }("");
         require(success, "ETH transfer to seller failed");
 
         emit Expired(option, seller, tokenId, shortTokenId);
     }
 
-    function domainSeparatorV4() public view returns (bytes32) {
-        return _domainSeparatorV4();
-    }
-
-    function filledOrders(uint256 tokenId) public view returns (bool) {
-        return tokenIdToCreationTimestamp[tokenId] > 0;
-    }
-
-    // function supportsInterface(bytes4 interfaceId)
-    //     public
-    //     view
-    //     override(ERC721, ERC721Enumerable)
-    //     returns (bool)
-    // {
-    //     return super.supportsInterface(interfaceId);
-    // }
-
-    /** Internal functions */
-
-    // function _beforeTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) internal override(ERC721, ERC721Enumerable) {
-    //     super._beforeTokenTransfer(from, to, tokenId);
-    // }
-
-    function _baseURI() internal view override returns (string memory) {
-        return baseURI;
-    }
+    /********************
+        UTIL FUNCTIONS
+    *********************/
 
     function _hashOption(Option calldata option)
         internal
@@ -258,4 +249,43 @@ contract Putty is
 
         shortOrderHash = keccak256(abi.encode(orderHash));
     }
+
+    /**********************
+        GETTER FUNCTIONS
+    **********************/
+
+    function domainSeparatorV4() public view returns (bytes32) {
+        return _domainSeparatorV4();
+    }
+
+    function filledOrders(uint256 tokenId) public view returns (bool) {
+        return tokenIdToCreationTimestamp[tokenId] > 0;
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseURI;
+    }
+
+    /***************
+        OVERRIDES
+    ****************/
+
+    // Only for L2s
+    // function _beforeTokenTransfer(
+    //     address from,
+    //     address to,
+    //     uint256 tokenId
+    // ) internal override(ERC721, ERC721Enumerable) {
+    //     super._beforeTokenTransfer(from, to, tokenId);
+    // }
+
+    // Only for L2s
+    // function supportsInterface(bytes4 interfaceId)
+    //     public
+    //     view
+    //     override(ERC721, ERC721Enumerable)
+    //     returns (bool)
+    // {
+    //     return super.supportsInterface(interfaceId);
+    // }
 }

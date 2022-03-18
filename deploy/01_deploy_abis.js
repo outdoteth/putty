@@ -16,11 +16,13 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         log: true,
     });
 
-    await deploy("WETH9", {
-        from: deployer,
-        args: [],
-        log: true,
-    });
+    if (!network.config.wethAddress) {
+        await deploy("WETH9", {
+            from: deployer,
+            args: [],
+            log: true,
+        });
+    }
 };
 
 module.exports.tags = ["Abis"];

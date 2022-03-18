@@ -44,6 +44,12 @@ module.exports = {
             },
         ],
     },
+    verify: {
+        etherscan: {
+            // apiKey: process.env.ETHERSCAN_KEY,
+            apiKey: process.env.OPTIMISM_ETHERSCAN_KEY,
+        },
+    },
     namedAccounts: {
         deployer: {
             default: 0,
@@ -75,14 +81,19 @@ module.exports = {
         rinkeby: {
             wethAddress: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
             url: "https://eth-rinkeby.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [process.env.ROPSTEN_KEY],
+            accounts: [
+                process.env.ROPSTEN_KEY,
+                "570a4ad0dce38620d7f9f7ba384a76400d7626699548fab5cc0b1986bc4e5e30",
+            ],
             tags: ["Abis", "Putty"],
+            baseUrl: "https://dev.putty.finance",
         },
         optimisticKovan: {
             wethAddress: "0xbc6f6b680bc61e30db47721c6d1c5cde19c1300d",
             url: "https://opt-kovan.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
             accounts: [process.env.ROPSTEN_KEY],
             tags: ["Abis", "Putty"],
+            baseUrl: "https://dev.putty.finance",
         },
         hardhat: {
             // mining: {

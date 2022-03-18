@@ -16,11 +16,20 @@ async function main() {
     // We get the contract to deploy
     const Putty = await hre.ethers.getContract("Putty");
     const chainId = await hre.getChainId();
-    const tx = await Putty.setBaseURI(
-        `https://dev.putty.finance/api/tokenMetadata/${chainId}/`
-    );
-    await tx.wait();
+    // const tx = await Putty.setBaseURI(
+    //     `https://dev.putty.finance/api/tokenMetadata/${chainId}/`
+    // );
+    // await tx.wait();
     console.log(await Putty.baseURI(), hre.getChainId());
+
+    const { deployer, secondary } = await hre.ethers.getNamedSigners();
+
+    console.log(secondary);
+    const res = await Putty.tokenURI(
+        `6782451757475171594838993254704657040536278412751580600685375159956768894275`
+    );
+    console.log(res);
+    // await withdrawTx.wait();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
