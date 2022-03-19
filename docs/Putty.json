@@ -1,0 +1,566 @@
+{
+    "methods": {
+        "approve(address,uint256)": {
+            "stateMutability": "nonpayable",
+            "code": "function approve(address to, uint256 tokenId) external nonpayable",
+            "inputs": {
+                "to": {
+                    "type": "address"
+                },
+                "tokenId": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {},
+            "details": "See {IERC721-approve}."
+        },
+        "balanceOf(address)": {
+            "stateMutability": "view",
+            "code": "function balanceOf(address owner) external view returns (uint256)",
+            "inputs": {
+                "owner": {
+                    "type": "address"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "uint256"
+                }
+            },
+            "details": "See {IERC721-balanceOf}."
+        },
+        "baseURI()": {
+            "stateMutability": "view",
+            "code": "function baseURI() external view returns (string)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "string"
+                }
+            }
+        },
+        "cancel(tuple)": {
+            "stateMutability": "nonpayable",
+            "code": "function cancel(Putty.Option option) external nonpayable",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option"
+                }
+            },
+            "outputs": {}
+        },
+        "cancelledOrders(uint256)": {
+            "stateMutability": "view",
+            "code": "function cancelledOrders(uint256) external view returns (bool)",
+            "inputs": {
+                "_0": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "bool"
+                }
+            },
+            "notice": "Gets whether or not a long option NFT buy order has been cancelled"
+        },
+        "domainSeparatorV4()": {
+            "stateMutability": "view",
+            "code": "function domainSeparatorV4() external view returns (bytes32)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "bytes32"
+                }
+            }
+        },
+        "exercise(tuple)": {
+            "stateMutability": "nonpayable",
+            "code": "function exercise(Putty.Option option) external nonpayable",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option"
+                }
+            },
+            "outputs": {}
+        },
+        "expire(tuple)": {
+            "stateMutability": "nonpayable",
+            "code": "function expire(Putty.Option option) external nonpayable",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option"
+                }
+            },
+            "outputs": {}
+        },
+        "feeRate()": {
+            "stateMutability": "view",
+            "code": "function feeRate() external view returns (uint256)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "uint256"
+                }
+            },
+            "notice": "Current fee rate - ex: 1.9% = 1.9 * 1000 = 1900"
+        },
+        "fillBuyOrder(tuple,bytes)": {
+            "stateMutability": "payable",
+            "code": "function fillBuyOrder(Putty.Option option, bytes signature) external payable",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option"
+                },
+                "signature": {
+                    "type": "bytes"
+                }
+            },
+            "outputs": {}
+        },
+        "filledOrders(uint256)": {
+            "stateMutability": "view",
+            "code": "function filledOrders(uint256 tokenId) external view returns (bool)",
+            "inputs": {
+                "tokenId": {
+                    "type": "uint256",
+                    "description": "The tokenId of the option to check"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "bool"
+                }
+            },
+            "notice": "Checks whether a buy order has been filled or not"
+        },
+        "getApproved(uint256)": {
+            "stateMutability": "view",
+            "code": "function getApproved(uint256 tokenId) external view returns (address)",
+            "inputs": {
+                "tokenId": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "address"
+                }
+            },
+            "details": "See {IERC721-getApproved}."
+        },
+        "isApprovedForAll(address,address)": {
+            "stateMutability": "view",
+            "code": "function isApprovedForAll(address owner, address operator) external view returns (bool)",
+            "inputs": {
+                "owner": {
+                    "type": "address"
+                },
+                "operator": {
+                    "type": "address"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "bool"
+                }
+            },
+            "details": "See {IERC721-isApprovedForAll}."
+        },
+        "name()": {
+            "stateMutability": "view",
+            "code": "function name() external view returns (string)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "string"
+                }
+            },
+            "details": "See {IERC721Metadata-name}."
+        },
+        "owner()": {
+            "stateMutability": "view",
+            "code": "function owner() external view returns (address)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "address"
+                }
+            },
+            "details": "Returns the address of the current owner."
+        },
+        "ownerOf(uint256)": {
+            "stateMutability": "view",
+            "code": "function ownerOf(uint256 tokenId) external view returns (address)",
+            "inputs": {
+                "tokenId": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "address"
+                }
+            },
+            "details": "See {IERC721-ownerOf}."
+        },
+        "renounceOwnership()": {
+            "stateMutability": "nonpayable",
+            "code": "function renounceOwnership() external nonpayable",
+            "inputs": {},
+            "outputs": {},
+            "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+        },
+        "safeTransferFrom(address,address,uint256)": {
+            "stateMutability": "nonpayable",
+            "code": "function safeTransferFrom(address from, address to, uint256 tokenId) external nonpayable",
+            "inputs": {
+                "from": {
+                    "type": "address"
+                },
+                "to": {
+                    "type": "address"
+                },
+                "tokenId": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {},
+            "details": "See {IERC721-safeTransferFrom}."
+        },
+        "safeTransferFrom(address,address,uint256,bytes)": {
+            "stateMutability": "nonpayable",
+            "code": "function safeTransferFrom(address from, address to, uint256 tokenId, bytes _data) external nonpayable",
+            "inputs": {
+                "from": {
+                    "type": "address"
+                },
+                "to": {
+                    "type": "address"
+                },
+                "tokenId": {
+                    "type": "uint256"
+                },
+                "_data": {
+                    "type": "bytes"
+                }
+            },
+            "outputs": {},
+            "details": "See {IERC721-safeTransferFrom}."
+        },
+        "setApprovalForAll(address,bool)": {
+            "stateMutability": "nonpayable",
+            "code": "function setApprovalForAll(address operator, bool approved) external nonpayable",
+            "inputs": {
+                "operator": {
+                    "type": "address"
+                },
+                "approved": {
+                    "type": "bool"
+                }
+            },
+            "outputs": {},
+            "details": "See {IERC721-setApprovalForAll}."
+        },
+        "setBaseURI(string)": {
+            "stateMutability": "nonpayable",
+            "code": "function setBaseURI(string baseURI_) external nonpayable",
+            "inputs": {
+                "baseURI_": {
+                    "type": "string"
+                }
+            },
+            "outputs": {}
+        },
+        "setFeeRate(uint256)": {
+            "stateMutability": "nonpayable",
+            "code": "function setFeeRate(uint256 feeRate_) external nonpayable",
+            "inputs": {
+                "feeRate_": {
+                    "type": "uint256",
+                    "description": "The new fee rate"
+                }
+            },
+            "outputs": {},
+            "notice": "Admin function which sets the fee that is collected on exercise"
+        },
+        "supportsInterface(bytes4)": {
+            "stateMutability": "view",
+            "code": "function supportsInterface(bytes4 interfaceId) external view returns (bool)",
+            "inputs": {
+                "interfaceId": {
+                    "type": "bytes4"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "bool"
+                }
+            },
+            "details": "See {IERC165-supportsInterface}."
+        },
+        "symbol()": {
+            "stateMutability": "view",
+            "code": "function symbol() external view returns (string)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "string"
+                }
+            },
+            "details": "See {IERC721Metadata-symbol}."
+        },
+        "tokenIdToCreationTimestamp(uint256)": {
+            "stateMutability": "view",
+            "code": "function tokenIdToCreationTimestamp(uint256) external view returns (uint256)",
+            "inputs": {
+                "_0": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "uint256"
+                }
+            },
+            "notice": "Gets the creation timestamp of a particular long option NFT"
+        },
+        "tokenURI(uint256)": {
+            "stateMutability": "view",
+            "code": "function tokenURI(uint256 tokenId) external view returns (string)",
+            "inputs": {
+                "tokenId": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {
+                "_0": {
+                    "type": "string"
+                }
+            },
+            "details": "See {IERC721Metadata-tokenURI}."
+        },
+        "transferFrom(address,address,uint256)": {
+            "stateMutability": "nonpayable",
+            "code": "function transferFrom(address from, address to, uint256 tokenId) external nonpayable",
+            "inputs": {
+                "from": {
+                    "type": "address"
+                },
+                "to": {
+                    "type": "address"
+                },
+                "tokenId": {
+                    "type": "uint256"
+                }
+            },
+            "outputs": {},
+            "details": "See {IERC721-transferFrom}."
+        },
+        "transferOwnership(address)": {
+            "stateMutability": "nonpayable",
+            "code": "function transferOwnership(address newOwner) external nonpayable",
+            "inputs": {
+                "newOwner": {
+                    "type": "address"
+                }
+            },
+            "outputs": {},
+            "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+        },
+        "uncollectedFees()": {
+            "stateMutability": "view",
+            "code": "function uncollectedFees() external view returns (uint256)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "uint256"
+                }
+            },
+            "notice": "Fees which have yet to be collected by the admin"
+        },
+        "weth()": {
+            "stateMutability": "view",
+            "code": "function weth() external view returns (contract ERC20)",
+            "inputs": {},
+            "outputs": {
+                "_0": {
+                    "type": "contract ERC20"
+                }
+            }
+        },
+        "withdrawFees(address)": {
+            "stateMutability": "nonpayable",
+            "code": "function withdrawFees(address recipient) external nonpayable",
+            "inputs": {
+                "recipient": {
+                    "type": "address",
+                    "description": "The account which will receive the fees"
+                }
+            },
+            "outputs": {},
+            "notice": "Admin function which withdraws uncollected fees to `recipient`"
+        }
+    },
+    "events": {
+        "Approval": {
+            "code": "event Approval(address indexed owner, address indexed approved, uint256 indexed tokenId)",
+            "inputs": {
+                "owner": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "approved": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "tokenId": {
+                    "type": "uint256",
+                    "indexed": true
+                }
+            }
+        },
+        "ApprovalForAll": {
+            "code": "event ApprovalForAll(address indexed owner, address indexed operator, bool approved)",
+            "inputs": {
+                "owner": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "operator": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "approved": {
+                    "type": "bool",
+                    "indexed": false
+                }
+            }
+        },
+        "BuyFilled": {
+            "code": "event BuyFilled(Putty.Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId)",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option",
+                    "indexed": false,
+                    "description": "The newly created option"
+                },
+                "seller": {
+                    "type": "address",
+                    "indexed": true,
+                    "description": "The account that filled the buy order"
+                },
+                "tokenId": {
+                    "type": "uint256",
+                    "indexed": false,
+                    "description": "The token ID of the newly created long option NFT"
+                },
+                "shortTokenId": {
+                    "type": "uint256",
+                    "indexed": false,
+                    "description": "The token ID of the newly created short option NFT"
+                }
+            },
+            "notice": "Fires when a buy order has been filled and an option contract is created"
+        },
+        "Cancelled": {
+            "code": "event Cancelled(Putty.Option option)",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option",
+                    "indexed": false,
+                    "description": "The option for the buy order which is being cancelled"
+                }
+            },
+            "notice": "Fires when a an open buy order is cancelled"
+        },
+        "Exercised": {
+            "code": "event Exercised(Putty.Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId)",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option",
+                    "indexed": false,
+                    "description": "The option which is being exercised"
+                },
+                "seller": {
+                    "type": "address",
+                    "indexed": true,
+                    "description": "The account that currently holds the short option NFT"
+                },
+                "tokenId": {
+                    "type": "uint256",
+                    "indexed": false,
+                    "description": "The token ID of the long option NFT"
+                },
+                "shortTokenId": {
+                    "type": "uint256",
+                    "indexed": false,
+                    "description": "The token ID of the short option NFT"
+                }
+            },
+            "notice": "Fires when a an option is exercised"
+        },
+        "Expired": {
+            "code": "event Expired(Putty.Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId)",
+            "inputs": {
+                "option": {
+                    "type": "Putty.Option",
+                    "indexed": false,
+                    "description": "The option that has expired"
+                },
+                "seller": {
+                    "type": "address",
+                    "indexed": true,
+                    "description": "The account that currently holds the short option NFT"
+                },
+                "tokenId": {
+                    "type": "uint256",
+                    "indexed": false,
+                    "description": "The token ID of the long option NFT"
+                },
+                "shortTokenId": {
+                    "type": "uint256",
+                    "indexed": false,
+                    "description": "The token ID of the short option NFT"
+                }
+            },
+            "notice": "Fires when a an option expires"
+        },
+        "OwnershipTransferred": {
+            "code": "event OwnershipTransferred(address indexed previousOwner, address indexed newOwner)",
+            "inputs": {
+                "previousOwner": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "newOwner": {
+                    "type": "address",
+                    "indexed": true
+                }
+            }
+        },
+        "Transfer": {
+            "code": "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)",
+            "inputs": {
+                "from": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "to": {
+                    "type": "address",
+                    "indexed": true
+                },
+                "tokenId": {
+                    "type": "uint256",
+                    "indexed": true
+                }
+            }
+        }
+    },
+    "errors": {},
+    "path": "",
+    "title": "Putty - https://putty.finance",
+    "notice": "Exotic option market for NFTs and ERC20s",
+    "author": "out.eth",
+    "name": "Putty"
+}

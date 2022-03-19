@@ -4,6 +4,7 @@ require("hardhat-deploy");
 require("hardhat-gas-reporter");
 require("dotenv").config();
 require("hardhat-contract-sizer");
+require("@primitivefi/hardhat-dodoc");
 
 // This is a sample Hardhat task. To learn how to create your own go to
 // https://hardhat.org/guides/create-task.html
@@ -43,6 +44,11 @@ module.exports = {
                 },
             },
         ],
+    },
+    dodoc: {
+        runOnCompile: true,
+        debugMode: true,
+        include: ["contracts/Putty.sol"],
     },
     verify: {
         etherscan: {

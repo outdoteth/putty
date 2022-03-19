@@ -24,6 +24,9 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/// @title Putty - https://putty.finance
+/// @author out.eth
+/// @notice Exotic option market for NFTs and ERC20s
 contract Putty is
     EIP712("Putty", "v0.9"),
     ERC721("Putty Options", "OPUT"),
@@ -33,18 +36,44 @@ contract Putty is
 {
     using SafeERC20 for ERC20;
 
+    /// @notice Fires when a buy order has been filled and an option contract is created
+    /// @param option The newly created option
+    /// @param seller The account that filled the buy order
+    /// @param tokenId The token ID of the newly created long option NFT
+    /// @param shortTokenId The token ID of the newly created short option NFT
     event BuyFilled(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
+
+    /// @notice Fires when a an option is exercised
+    /// @param option The option which is being exercised
+    /// @param seller The account that currently holds the short option NFT
+    /// @param tokenId The token ID of the long option NFT
+    /// @param shortTokenId The token ID of the short option NFT
     event Exercised(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
+
+    /// @notice Fires when a an open buy order is cancelled
+    /// @param option The option for the buy order which is being cancelled
     event Cancelled(Option option);
+
+    /// @notice Fires when a an option expires
+    /// @param option The option that has expired
+    /// @param seller The account that currently holds the short option NFT
+    /// @param tokenId The token ID of the long option NFT
+    /// @param shortTokenId The token ID of the short option NFT
     event Expired(Option option, address indexed seller, uint256 tokenId, uint256 shortTokenId);
 
     ERC20 public immutable weth;
     string public baseURI;
 
+    /// @notice Fees which have yet to be collected by the admin
     uint256 public uncollectedFees;
+
+    /// @notice Current fee rate - ex: 1.9% = 1.9 * 1000 = 1900
     uint256 public feeRate;
 
+    /// @notice Gets the creation timestamp of a particular long option NFT
     mapping(uint256 => uint256) public tokenIdToCreationTimestamp;
+
+    /// @notice Gets whether or not a long option NFT buy order has been cancelled
     mapping(uint256 => bool) public cancelledOrders;
 
     struct ERC20Info {
@@ -85,11 +114,15 @@ contract Putty is
         baseURI = baseURI_;
     }
 
+    /// @notice Admin function which sets the fee that is collected on exercise
+    /// @param feeRate_ The new fee rate
     function setFeeRate(uint256 feeRate_) public onlyOwner {
         require(feeRate_ <= 1000, "Cannot charge greater than 100% fees");
         feeRate = feeRate_;
     }
 
+    /// @notice Admin function which withdraws uncollected fees to `recipient`
+    /// @param recipient The account which will receive the fees
     function withdrawFees(address recipient) public onlyOwner {
         uint256 amount = uncollectedFees;
         uncollectedFees = 0;
@@ -102,6 +135,9 @@ contract Putty is
         LOGIC FUNCTIONS
     **********************/
 
+    /// @notice Fills an existing buy order
+    /// @param option The buy order to fill
+    /// @param signature The buy order owner's signature to verify that the buy order is valid
     function fillBuyOrder(Option calldata option, bytes calldata signature)
         public
         payable
@@ -142,6 +178,8 @@ contract Putty is
         emit BuyFilled(option, msg.sender, tokenId, shortTokenId);
     }
 
+    /// @notice Exercises a long option NFT and burns both the short and long option NFTs
+    /// @param option The option to exercise
     function exercise(Option calldata option) public nonReentrant {
         // *** Checks *** //
 
@@ -150,7 +188,7 @@ contract Putty is
         (uint256 tokenId, uint256 shortTokenId) = (uint256(orderHash), uint256(shortOrderHash));
         (address buyer, address seller) = (ownerOf(tokenId), ownerOf(shortTokenId));
 
-        // check that the person calling is the owner of the option
+        // check that the account calling is the owner of the option
         require(buyer == msg.sender, "Cannot exercise option you dont own");
         require(
             block.timestamp <= tokenIdToCreationTimestamp[tokenId] + option.duration,
@@ -186,6 +224,8 @@ contract Putty is
         emit Exercised(option, seller, tokenId, shortTokenId);
     }
 
+    /// @notice Cancels an unfilled buy order
+    /// @param option The unfilled option to cancel
     function cancel(Option calldata option) public {
         require(msg.sender == option.owner, "You are not the owner");
 
@@ -197,6 +237,8 @@ contract Putty is
         emit Cancelled(option);
     }
 
+    /// @notice Expires an option and burns the long and short option NFTs
+    /// @param option The option to expire
     function expire(Option calldata option) public {
         // *** Checks *** //
 
@@ -258,6 +300,8 @@ contract Putty is
         return _domainSeparatorV4();
     }
 
+    /// @notice Checks whether a buy order has been filled or not
+    /// @param tokenId The tokenId of the option to check
     function filledOrders(uint256 tokenId) public view returns (bool) {
         return tokenIdToCreationTimestamp[tokenId] > 0;
     }
