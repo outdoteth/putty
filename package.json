@@ -19,7 +19,8 @@
     "hardhat": "^2.8.3",
     "hardhat-deploy": "^0.10.1",
     "prettier": "^2.5.1",
-    "prettier-plugin-solidity": "^1.0.0-beta.19"
+    "prettier-plugin-solidity": "^1.0.0-beta.19",
+    "solidity-coverage": "^0.7.20"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.4.2",

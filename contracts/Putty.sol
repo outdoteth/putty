@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
 
 /*
@@ -205,19 +205,24 @@ contract Putty is
 
         // transfer underlying erc20 assets from buyer to seller
         for (uint256 i = 0; i < option.erc20Underlying.length; i++) {
-            ERC20Info memory info = option.erc20Underlying[i];
+            ERC20Info calldata info = option.erc20Underlying[i];
             info.token.safeTransferFrom(buyer, seller, info.amount);
         }
 
         // transfer underlying erc721 assets from buyer to seller
         for (uint256 i = 0; i < option.erc721Underlying.length; i++) {
-            ERC721Info memory info = option.erc721Underlying[i];
+            ERC721Info calldata info = option.erc721Underlying[i];
             info.token.transferFrom(buyer, seller, info.tokenId);
         }
 
-        // transfer strike (ETH) to buyer and collect our fee
-        uint256 fee = (option.strike * feeRate) / 1000;
-        uncollectedFees += fee;
+        // collect fee
+        uint256 fee;
+        if (feeRate > 0) {
+            fee = (option.strike * feeRate) / 1000;
+            uncollectedFees += fee;
+        }
+
+        // transfer `strike - fee` to the buyer
         (bool success, ) = buyer.call{ value: option.strike - fee }("");
         require(success, "ETH transfer to buyer failed");
 
@@ -276,6 +281,13 @@ contract Putty is
         view
         returns (bytes32 orderHash, bytes32 shortOrderHash)
     {
+        // TODO: log abi.encode(option) and see what the output for arrays is
+
+        // NOTE:
+        // This was implemented incorrectly but it's too late/risky to change now.
+        // It should be updated to be EIP-712 compliant and also there is no need
+        // to hash the underlying assets - it's just as secure to do this instead:
+        // `orderHash = keccak256(abi.encode(_domainSeparatorV4(), option))`
         orderHash = keccak256(
             abi.encode(
                 _domainSeparatorV4(),
