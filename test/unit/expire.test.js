@@ -34,7 +34,7 @@ describe("expire", () => {
         await expect(call).to.emit(Putty, "Expired");
     });
 
-    it("After expire order still be marked as filled", async function () {
+    it("Should still mark order as filled after it's expired", async function () {
         // arrange
         const { secondary } = await ethers.getNamedSigners();
         await network.provider.send("evm_increaseTime", [option.duration]);

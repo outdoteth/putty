@@ -9,15 +9,19 @@ const getFixture = async () => {
         await ethers.getSigners();
 
     const Weth = await ethers.getContract("WETH9", deployer.address);
+
     const GoldToken = await ethers.getContract("GoldToken", deployer.address);
+
     const SilverToken = await ethers.getContract(
         "SilverToken",
         deployer.address
     );
+
     const CryptoPunks = await ethers.getContract(
         "CryptoPunks",
         deployer.address
     );
+
     const Putty = await ethers.getContract("Putty", deployer.address);
 
     const option = {
@@ -48,6 +52,7 @@ const getFixture = async () => {
         ],
     };
 
+    // Mint a bunch of test ERC20s and NFTs and max approve them on Putty contract
     for (signer of [deployer, secondary, tertiary, quaternary]) {
         // mint weth
         await Weth.connect(signer).approve(Putty.address, constants.MaxUint256);
