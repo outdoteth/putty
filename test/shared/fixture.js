@@ -3,7 +3,7 @@ const { parseEther } = require("ethers/lib/utils");
 const { deployments, ethers } = require("hardhat");
 
 const getFixture = async () => {
-    await deployments.fixture(["Tokens", "Putty", "Abis"]);
+    await deployments.fixture(["test", "putty"]);
 
     const [deployer, secondary, tertiary, quaternary] =
         await ethers.getSigners();

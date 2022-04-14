@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 const { arrayify } = require("ethers/lib/utils");
-const { ethers } = require("hardhat");
+const { ethers, deployments } = require("hardhat");
 const { getFixture } = require("../shared/fixture");
 const { signOrder } = require("../utils");
 
@@ -45,6 +45,7 @@ describe("fillBuyOrder", function () {
         });
 
         // assert
+        expect(await Putty.balanceOf(secondary.address)).to.equal(1);
         expect(await Putty.ownerOf(longOptionTokenId)).to.equal(
             secondary.address
         );
@@ -62,6 +63,7 @@ describe("fillBuyOrder", function () {
         });
 
         // assert
+        expect(await Putty.balanceOf(deployer.address)).to.equal(1);
         expect(await Putty.ownerOf(shortOptionTokenId)).to.equal(
             deployer.address
         );
@@ -94,11 +96,12 @@ describe("fillBuyOrder", function () {
         await Putty.connect(deployer).fillBuyOrder(option, signature, {
             value: option.strike,
         });
+        const { timestamp } = await ethers.provider.getBlock();
 
         // assert
         expect(
             await Putty.tokenIdToCreationTimestamp(longOptionTokenId)
-        ).to.not.equal(0);
+        ).to.equal(timestamp);
     });
 
     it("Should fail on invalid signature", async function () {
@@ -132,15 +135,6 @@ describe("fillBuyOrder", function () {
             Weth,
             [deployer, secondary],
             [option.premium, option.premium.mul(-1)]
-        );
-
-        expect(await Putty.balanceOf(secondary.address)).to.equal(1);
-        expect(await Putty.ownerOf(arrayify(orderHash))).to.equal(
-            secondary.address
-        );
-
-        expect(await Putty.ownerOf(arrayify(shortOrderHash))).to.equal(
-            deployer.address
         );
     });
 

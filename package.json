@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy-opkovan": "hardhat deploy --network optimisticKovan --export optimistic-kovan-contracts.json --tags Abis,Putty",
-    "deploy-kovan": "hardhat deploy --network kovan --export kovan-contracts.json --tags Abis,Putty"
+    "deploy-opkovan": "hardhat deploy --network optimisticKovan --export optimistic-kovan-contracts.json --tags putty",
+    "deploy-kovan": "hardhat deploy --network kovan --export kovan-contracts.json --tags putty"
   },
   "author": "",
   "license": "ISC",

@@ -22,4 +22,4 @@ module.exports = async ({
     });
 };
 
-module.exports.tags = ["Putty"];
+module.exports.tags = ["putty"];

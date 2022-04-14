@@ -207,7 +207,7 @@ contract Putty is
         for (uint256 i = 0; i < option.erc20Underlying.length; i++) {
             ERC20Info calldata info = option.erc20Underlying[i];
 
-            // NOTE: Seller is able to grief the buyer if safeTransferFrom
+            // NOTE: Seller is able to grief the buyer if transferFrom
             // has a custom callback on receiving
             info.token.safeTransferFrom(buyer, seller, info.amount);
         }

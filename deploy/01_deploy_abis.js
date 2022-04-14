@@ -15,14 +15,6 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         args: ["erc721", "token", "http://testing/"],
         log: true,
     });
-
-    if (!network.config.wethAddress) {
-        await deploy("WETH9", {
-            from: deployer,
-            args: [],
-            log: true,
-        });
-    }
 };
 
-module.exports.tags = ["Abis"];
+module.exports.tags = ["abis"];
