@@ -35,7 +35,6 @@ module.exports = {
         debugMode: true,
         include: ["contracts/Putty.sol"],
     },
-
     verify: {
         etherscan: {
             // apiKey: process.env.ETHERSCAN_KEY,
@@ -67,30 +66,27 @@ module.exports = {
         kovan: {
             wethAddress: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
             url: "https://eth-kovan.alchemyapi.io/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [process.env.ROPSTEN_KEY],
+            accounts: [process.env.TESTNET_KEY],
             tags: ["Abis", "Putty"],
         },
         rinkeby: {
             wethAddress: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
             url: "https://eth-rinkeby.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [
-                process.env.ROPSTEN_KEY,
-                "570a4ad0dce38620d7f9f7ba384a76400d7626699548fab5cc0b1986bc4e5e30",
-            ],
+            accounts: [process.env.TESTNET_KEY],
             tags: ["Abis", "Putty"],
             baseUrl: "https://dev.putty.finance",
         },
         optimisticKovan: {
             wethAddress: "0xbc6f6b680bc61e30db47721c6d1c5cde19c1300d",
             url: "https://opt-kovan.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [process.env.ROPSTEN_KEY],
+            accounts: [process.env.TESTNET_KEY],
             tags: ["Abis", "Putty"],
             baseUrl: "https://dev.putty.finance",
         },
-        hardhat: {
+        localhost: {
             // mining: {
             //     auto: false,
-            //     interval: 10_000,
+            //     interval: 500,
             // },
         },
     },

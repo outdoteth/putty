@@ -1,4 +1,4 @@
-module.exports = async ({ getNamedAccounts, deployments }) => {
+module.exports = async ({ getNamedAccounts, deployments, network }) => {
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
