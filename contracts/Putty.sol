@@ -206,18 +206,12 @@ contract Putty is
         // transfer underlying erc20 assets from buyer to seller
         for (uint256 i = 0; i < option.erc20Underlying.length; i++) {
             ERC20Info calldata info = option.erc20Underlying[i];
-
-            // NOTE: Seller is able to grief the buyer if transferFrom
-            // has a custom callback on receiving
             info.token.safeTransferFrom(buyer, seller, info.amount);
         }
 
         // transfer underlying erc721 assets from buyer to seller
         for (uint256 i = 0; i < option.erc721Underlying.length; i++) {
             ERC721Info calldata info = option.erc721Underlying[i];
-
-            // NOTE: Seller is able to grief the buyer if transferFrom
-            // has a custom callback on receiving
             info.token.transferFrom(buyer, seller, info.tokenId);
         }
 

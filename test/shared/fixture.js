@@ -56,8 +56,6 @@ const getFixture = async () => {
         ],
     };
 
-    console.log("option", option);
-
     // Mint a bunch of test ERC20s and NFTs and max approve them on Putty contract
     for (signer of [deployer, secondary, tertiary, quaternary]) {
         // mint weth
