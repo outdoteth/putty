@@ -6,7 +6,6 @@ require("dotenv").config();
 require("hardhat-contract-sizer");
 require("@primitivefi/hardhat-dodoc");
 require("solidity-coverage");
-require("@nomiclabs/hardhat-solhint");
 
 module.exports = {
     solidity: {

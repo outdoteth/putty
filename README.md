@@ -23,6 +23,8 @@ npx hardhat test
 
 ## Deploy
 
+The following will deploy to localhost (hardhat node):
+
 ```shell
 npx hardhat node
 npx hardhat deploy --network localhost
@@ -49,4 +51,10 @@ File        |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
 ------------|----------|----------|----------|----------|----------------|
 All files   |      100 |    88.46 |      100 |      100 |                |
 ------------|----------|----------|----------|----------|----------------|
+```
+
+## Lint
+
+```
+npm run lint
 ```
