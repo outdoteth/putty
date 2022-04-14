@@ -117,7 +117,7 @@ contract Putty is
     /// @notice Admin function which sets the fee that is collected on exercise
     /// @param feeRate_ The new fee rate
     function setFeeRate(uint256 feeRate_) public onlyOwner {
-        require(feeRate_ <= 1000, "Cannot charge greater than 100% fees");
+        require(feeRate_ <= 1000, "Fee can't be greater than 100%");
         feeRate = feeRate_;
     }
 
@@ -127,6 +127,7 @@ contract Putty is
         uint256 amount = uncollectedFees;
         uncollectedFees = 0;
 
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = recipient.call{ value: amount }("");
         require(success, "ETH transfer failed");
     }
@@ -189,7 +190,7 @@ contract Putty is
         (address buyer, address seller) = (ownerOf(tokenId), ownerOf(shortTokenId));
 
         // check that the account calling is the owner of the option
-        require(buyer == msg.sender, "Cannot exercise option you dont own");
+        require(buyer == msg.sender, "You don't own this option");
         require(
             block.timestamp <= tokenIdToCreationTimestamp[tokenId] + option.duration,
             "Expired option"
@@ -223,6 +224,7 @@ contract Putty is
         }
 
         // transfer `strike - fee` to the buyer
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = buyer.call{ value: option.strike - fee }("");
         require(success, "ETH transfer to buyer failed");
 
@@ -266,6 +268,7 @@ contract Putty is
         // *** Interactions *** //
 
         // transfer strike (ETH) to seller
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, ) = seller.call{ value: option.strike }("");
         require(success, "ETH transfer to seller failed");
 

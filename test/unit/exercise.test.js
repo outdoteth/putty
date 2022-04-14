@@ -115,9 +115,7 @@ describe("exercise", () => {
 
     it("Should not exercise option you dont own", async function () {
         const call = Putty.exercise(option);
-        await expect(call).to.be.revertedWith(
-            "Cannot exercise option you dont own"
-        );
+        await expect(call).to.be.revertedWith("You don't own this option");
     });
 
     it("Should revert if option has expired", async function () {
