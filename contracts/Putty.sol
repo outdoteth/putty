@@ -128,7 +128,7 @@ contract Putty is
         uncollectedFees = 0;
 
         (bool success, ) = recipient.call{ value: amount }("");
-        require(success, "ETH transfer to seller failed");
+        require(success, "ETH transfer failed");
     }
 
     /*********************
@@ -284,7 +284,7 @@ contract Putty is
         // NOTE:
         // This was implemented incorrectly but it's too late to change now.
         // It should be updated to be EIP-712 compliant and also there is no need
-        // to hash the underlying assets - it's just as secure to do this instead:
+        // to pre-hash the underlying assets - it's just as secure to do this instead:
         // `orderHash = keccak256(abi.encode(_domainSeparatorV4(), option))`
         orderHash = keccak256(
             abi.encode(

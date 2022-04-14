@@ -1,15 +1,52 @@
-# Basic Sample Hardhat Project
+# Putty
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+Putty is an exotic options market for NFTs and ERC20s
 
-Try running some of the following tasks:
+**Links:**
+
+* [putty.finance](https://putty.finance)
+* [testnet.putty.finance](https://testnet.putty.finance)
+
+---
+
+## Installation
 
 ```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
+npm install
+```
+
+## Testing
+
+```shell
 npx hardhat test
+```
+
+## Deploy
+
+```shell
 npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
+npx hardhat deploy --network localhost
+```
+
+## Docs
+
+```shell
+npx hardhat dodoc
+```
+
+## Coverage
+
+```
+npx hardhat coverage
+```
+
+```
+------------|----------|----------|----------|----------|----------------|
+File        |  % Stmts | % Branch |  % Funcs |  % Lines |Uncovered Lines |
+------------|----------|----------|----------|----------|----------------|
+ contracts/ |    98.39 |    88.46 |    91.67 |    98.39 |                |
+  Putty.sol |    98.39 |    88.46 |    91.67 |    98.39 |            320 |
+------------|----------|----------|----------|----------|----------------|
+All files   |    98.39 |    88.46 |    91.67 |    98.39 |                |
+------------|----------|----------|----------|----------|----------------|
 ```

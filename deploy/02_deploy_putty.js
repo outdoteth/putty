@@ -7,7 +7,9 @@ module.exports = async ({ getNamedAccounts, deployments, getChainId }) => {
     const wethAddress =
         network.config.wethAddress || (await deployments.get("WETH9")).address;
     const chainId = await getChainId();
-    const baseURI = `${network.config.baseUrl}/api/tokenMetadata/${chainId}/`;
+    const baseURI = `${
+        network.config.baseUrl || "https://testing"
+    }/api/tokenMetadata/${chainId}/`;
     const feeRate = 0; // 0%
 
     await deploy("Putty", {

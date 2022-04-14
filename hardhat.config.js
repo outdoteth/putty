@@ -66,20 +66,20 @@ module.exports = {
         kovan: {
             wethAddress: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",
             url: "https://eth-kovan.alchemyapi.io/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [process.env.TESTNET_KEY],
+            accounts: [process.env.TESTNET_PRIVATE_KEY],
             tags: ["putty"],
         },
         rinkeby: {
             wethAddress: "0xc778417E063141139Fce010982780140Aa0cD5Ab",
             url: "https://eth-rinkeby.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [process.env.TESTNET_KEY],
+            accounts: [process.env.TESTNET_PRIVATE_KEY],
             tags: ["putty"],
             baseUrl: "https://dev.putty.finance",
         },
         optimisticKovan: {
             wethAddress: "0xbc6f6b680bc61e30db47721c6d1c5cde19c1300d",
             url: "https://opt-kovan.g.alchemy.com/v2/xIfGtYkBktfmzzRXTd3No1j5byeNGHOB",
-            accounts: [process.env.TESTNET_KEY],
+            accounts: [process.env.TESTNET_PRIVATE_KEY],
             tags: ["putty"],
             baseUrl: "https://dev.putty.finance",
         },

@@ -1,4 +1,5 @@
 const { expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { arrayify } = require("ethers/lib/utils");
 const { ethers, deployments } = require("hardhat");
 const { getFixture } = require("../shared/fixture");
@@ -175,5 +176,33 @@ describe("fillBuyOrder", function () {
         // assert
         expect(beforeFilled).to.eq(false);
         expect(afterFilled).to.eq(true);
+    });
+
+    it("Should return correct tokenURI for minted option NFTs", async function () {
+        // arrange
+        const { secondary } = await ethers.getNamedSigners();
+        const baseURI = await Putty.baseURI();
+        const { signature, orderHash, shortOrderHash } = await signOrder(
+            option,
+            secondary,
+            Putty
+        );
+
+        const expectedLongTokenURI =
+            baseURI + BigNumber.from(orderHash).toString();
+        const expectedShortTokenURI =
+            baseURI + BigNumber.from(shortOrderHash).toString();
+
+        // act
+        await Putty.fillBuyOrder(option, signature, {
+            value: option.strike,
+        });
+
+        const longTokenURI = await Putty.tokenURI(orderHash);
+        const shortTokenURI = await Putty.tokenURI(shortOrderHash);
+
+        // assert
+        expect(longTokenURI).to.eq(expectedLongTokenURI);
+        expect(shortTokenURI).to.eq(expectedShortTokenURI);
     });
 });

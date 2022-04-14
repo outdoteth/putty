@@ -23,6 +23,7 @@ const getFixture = async () => {
     );
 
     const Putty = await ethers.getContract("Putty", deployer.address);
+    await Putty.setFeeRate(19); // 1.9%
 
     const option = {
         strike: parseEther("1"),
@@ -48,10 +49,6 @@ const getFixture = async () => {
             {
                 token: CryptoPunks.address,
                 tokenId: 3,
-            },
-            {
-                token: CryptoPunks.address,
-                tokenId: 4,
             },
         ],
     };
