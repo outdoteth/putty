@@ -49,8 +49,14 @@ const getFixture = async () => {
                 token: CryptoPunks.address,
                 tokenId: 3,
             },
+            {
+                token: CryptoPunks.address,
+                tokenId: 4,
+            },
         ],
     };
+
+    console.log("option", option);
 
     // Mint a bunch of test ERC20s and NFTs and max approve them on Putty contract
     for (signer of [deployer, secondary, tertiary, quaternary]) {

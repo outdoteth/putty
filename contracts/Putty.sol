@@ -287,10 +287,8 @@ contract Putty is
         view
         returns (bytes32 orderHash, bytes32 shortOrderHash)
     {
-        // TODO: log abi.encode(option) and see what the output for arrays is
-
         // NOTE:
-        // This was implemented incorrectly but it's too late/risky to change now.
+        // This was implemented incorrectly but it's too late to change now.
         // It should be updated to be EIP-712 compliant and also there is no need
         // to hash the underlying assets - it's just as secure to do this instead:
         // `orderHash = keccak256(abi.encode(_domainSeparatorV4(), option))`
