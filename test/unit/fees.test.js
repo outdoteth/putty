@@ -28,9 +28,7 @@ describe("fees", async function () {
 
     it("Should not set feeRate greater than 100%", async function () {
         const call = Putty.setFeeRate(1001);
-        await expect(call).to.be.revertedWith(
-            "Cannot charge greater than 100% fees"
-        );
+        await expect(call).to.be.revertedWith("Fee can't be greater than 100%");
     });
 
     it("Should not update uncollected fees if feeRate is set to 0", async function () {
