@@ -9,3 +9,5 @@ typechain
 #Hardhat files
 cache
 artifacts
+
+sample-script.js
