@@ -40,8 +40,8 @@ module.exports = {
     },
     verify: {
         etherscan: {
-            apiKey: process.env.ETHERSCAN_KEY,
-            // apiKey: process.env.OPTIMISM_ETHERSCAN_KEY,
+            // apiKey: process.env.ETHERSCAN_KEY,
+            apiKey: process.env.OPTIMISM_ETHERSCAN_KEY,
         },
     },
     namedAccounts: {
@@ -59,12 +59,20 @@ module.exports = {
         runOnCompile: true,
     },
     networks: {
-        optimistic: {
-            url: "http://127.0.0.1:8545",
-            accounts: {
-                mnemonic:
-                    "test test test test test test test test test test test junk",
-            },
+        mainnet: {
+            wethAddress: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+            url: "https://eth-mainnet.alchemyapi.io/v2/k23IS-WoFyk1VVAvgGXnYlNvTrdQCv-1",
+            accounts: [
+                process.env.MAINNET_PRIVATE_KEY || HARDHAT_DEFAULT_PRIVATE_KEY,
+            ],
+        },
+        optimisticEthereum: {
+            baseUrl: "https://dev.putty.finance",
+            wethAddress: "0x4200000000000000000000000000000000000006",
+            url: "https://opt-mainnet.g.alchemy.com/v2/_lGA7RCvsFNDuuYRxKMq9Rhbz0zfd-Io",
+            accounts: [
+                process.env.MAINNET_PRIVATE_KEY || HARDHAT_DEFAULT_PRIVATE_KEY,
+            ],
         },
         kovan: {
             wethAddress: "0xd0a1e359811322d97991e03f863a0c30c2cf029c",

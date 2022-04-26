@@ -30,7 +30,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Putty is
     EIP712("Putty", "v0.9"),
     ERC721("Putty Options", "OPUT"),
-    // ERC721Enumerable, // Only for L2s
+    ERC721Enumerable, // Only for L2s
     ReentrancyGuard,
     Ownable
 {
@@ -328,21 +328,21 @@ contract Putty is
     ****************/
 
     // Only for L2s
-    // function _beforeTokenTransfer(
-    //     address from,
-    //     address to,
-    //     uint256 tokenId
-    // ) internal override(ERC721, ERC721Enumerable) {
-    //     super._beforeTokenTransfer(from, to, tokenId);
-    // }
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 tokenId
+    ) internal override(ERC721, ERC721Enumerable) {
+        super._beforeTokenTransfer(from, to, tokenId);
+    }
 
     // Only for L2s
-    // function supportsInterface(bytes4 interfaceId)
-    //     public
-    //     view
-    //     override(ERC721, ERC721Enumerable)
-    //     returns (bool)
-    // {
-    //     return super.supportsInterface(interfaceId);
-    // }
+    function supportsInterface(bytes4 interfaceId)
+        public
+        view
+        override(ERC721, ERC721Enumerable)
+        returns (bool)
+    {
+        return super.supportsInterface(interfaceId);
+    }
 }
