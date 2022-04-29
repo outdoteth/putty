@@ -211,4 +211,19 @@ describe("exercise", () => {
         expect(await Putty.uncollectedFees()).to.eq(fee);
         expect(await ethers.provider.getBalance(Putty.address)).to.eq(fee);
     });
+
+    it("Should not exercise option that has already been expired and burned", async () => {
+        // act
+        await network.provider.send("evm_increaseTime", [option.duration]);
+        await network.provider.send("evm_mine");
+        await Putty.expire(option);
+
+        // act
+        const call = Putty.exercise(option);
+
+        // assert
+        await expect(call).to.be.revertedWith(
+            "ERC721: owner query for nonexistent token"
+        );
+    });
 });
